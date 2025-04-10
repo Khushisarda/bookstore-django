@@ -4,7 +4,21 @@ from django.contrib.auth.decorators import login_required
 from .models import Book
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
+from .forms import RegistrationForm
 
+
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('login')  # Redirect to the login page after successful registration
+    else:
+        form = RegistrationForm()
+    
+    return render(request, 'store/register.html', {'form': form})
 
 def home(request):
     books = Book.objects.all()
