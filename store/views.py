@@ -98,7 +98,8 @@ def cart(request):
     total_price = 0
 
     for book in books:
-        quantity = cart[str(book.id)]
+        book_id_str = str(book.id)
+        quantity = cart.get(book_id_str, 0)
         subtotal = book.price * quantity
         total_price += subtotal
         cart_items.append({
@@ -107,11 +108,38 @@ def cart(request):
             'subtotal': subtotal
         })
 
-    return render(request, 'store/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+    return render(request, 'store/cart.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
 
 
 def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
     return render(request, 'store/book_detail.html', {'book': book})
+
+@login_required
+def update_cart(request, book_id):
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+        cart = request.session.get('cart', {})
+        if quantity > 0:
+            cart[str(book_id)] = quantity
+        else:
+            cart.pop(str(book_id), None)
+        request.session['cart'] = cart
+    return redirect('cart')
+
+@login_required
+def remove_from_cart(request, book_id):
+    cart = request.session.get('cart', {})
+    cart.pop(str(book_id), None)
+    request.session['cart'] = cart
+    return redirect('cart')
+
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('book_list')
+    return redirect('login')
 
 # Create your views here.
