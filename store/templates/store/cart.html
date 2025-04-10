@@ -1,73 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Your Cart</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            padding: 40px;
-            color: #333;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        .links {
-            text-align: center;
-            margin-top: 20px;
-        }
-        a {
-            text-decoration: none;
-            color: #007bff;
-            margin: 0 10px;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .empty {
-            text-align: center;
-            color: #888;
-            font-style: italic;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>Your Cart</h2>
-
-        <ul>
-            {% if cart %}
-                {% for item in cart %}
-                    <li>{{ item.title }} by {{ item.author }} - ₹{{ item.price }}</li>
-                {% endfor %}
-            {% else %}
-                <p class="empty">Your cart is empty.</p>
-            {% endif %}
-        </ul>
-
-        <div class="links">
-            <a href="{% url 'book_list' %}">📚 Back to Book List</a> |
-            <a href="{% url 'logout' %}">🚪 Logout</a>
-        </div>
-    </div>
-</body>
-</html>
+{% extends 'store/base.html' %}
+{% block content %}
+<h2 class="mb-4">Your Cart</h2>
+{% if cart %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Book</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart %}
+        <tr>
+            <td>{{ item.title }}</td>
+            <td>₹{{ item.price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'book_list' %}" class="btn btn-secondary">Back to Book List</a>
+{% else %}
+<p>Your cart is empty.</p>
+<a href="{% url 'book_list' %}" class="btn btn-secondary">Browse Books</a>
+{% endif %}
+{% endblock %}
