@@ -56,16 +56,45 @@ def book_list(request):
 
 @login_required
 def add_to_cart(request, book_id):
-    cart = request.session.get('cart', [])
-    cart.append(book_id)
+    cart = request.session.get('cart')
+
+    # 🛠️ Fix: If cart is not a dictionary, reset it
+    if not isinstance(cart, dict):
+        cart = {}
+
+    book_id_str = str(book_id)
+
+    if book_id_str in cart:
+        cart[book_id_str] += 1
+    else:
+        cart[book_id_str] = 1
+
     request.session['cart'] = cart
     return redirect('cart')
 
+
+
 @login_required
 def cart(request):
-    cart = request.session.get('cart', [])
-    books = Book.objects.filter(id__in=cart)
-    return render(request, 'store/cart.html', {'books': books})
+    cart = request.session.get('cart', {})
+    book_ids = cart.keys()
+    books = Book.objects.filter(id__in=book_ids)
+
+    cart_items = []
+    total_price = 0
+
+    for book in books:
+        quantity = cart[str(book.id)]
+        subtotal = book.price * quantity
+        total_price += subtotal
+        cart_items.append({
+            'book': book,
+            'quantity': quantity,
+            'subtotal': subtotal
+        })
+
+    return render(request, 'store/cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
 
 def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
