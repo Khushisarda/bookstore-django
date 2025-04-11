@@ -5,7 +5,12 @@ from .models import Book
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from .forms import RegistrationForm
+from django.contrib import messages 
+from django.contrib.auth import logout
 
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 def register(request):
     if request.method == 'POST':
@@ -39,9 +44,19 @@ def login_view(request):
             return render(request, 'store/login.html', {'error': 'Invalid credentials'})
     return render(request, 'store/login.html')
 
-def logout_view(request):
-    logout(request)
-    return redirect('login')
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            messages.success(request, "You have successfully logged in!")  
+            return redirect('book_list')
+        else:
+            return render(request, 'store/login.html', {'error': 'Invalid credentials'})
+    return render(request, 'store/login.html')
 
 @login_required
 @login_required
@@ -53,7 +68,7 @@ def book_list(request):
 
     if query:
         books = books.filter(title__icontains=query)
-    if category:
+    if category and category != 'all':  # Ensure 'all' doesn't filter out everything
         books = books.filter(category__iexact=category)
 
     categories = Book.objects.values_list('category', flat=True).distinct()
@@ -66,7 +81,6 @@ def book_list(request):
         'categories': categories,
         'page_obj': page_obj
     })
-
 
 @login_required
 def add_to_cart(request, book_id):
@@ -133,9 +147,17 @@ def update_cart(request, book_id):
 @login_required
 def remove_from_cart(request, book_id):
     cart = request.session.get('cart', {})
-    cart.pop(str(book_id), None)
+    book_id_str = str(book_id)
+
+    if book_id_str in cart:
+        if cart[book_id_str] > 1:
+            cart[book_id_str] -= 1  # Just reduce one quantity
+        else:
+            cart.pop(book_id_str)  # Remove the item if quantity is 1
+
     request.session['cart'] = cart
     return redirect('cart')
+
 
 def home(request):
     if request.user.is_authenticated:

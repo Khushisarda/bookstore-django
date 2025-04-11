@@ -23,15 +23,21 @@
             </div>
         </div>
     </nav>
-
+    {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
     <div class="container mt-4">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-dark text-light text-center py-3 mt-5">
-        <p>© 2025 Bookstore. All rights reserved.</p>
-    </footer>
+    
 
 </body>
 </html>

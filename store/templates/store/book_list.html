@@ -1,4 +1,5 @@
 {% extends 'store/base.html' %}
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Available Books</h2>
@@ -8,7 +9,7 @@
         <select name="category" class="form-select" style="max-width: 200px;">
             <option value="all">All Categories</option>
             {% for cat in categories %}
-                <option value="{{ cat }}" {% if request.GET.category == cat %}selected{% endif %}>{{ cat }}</option>
+                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
             {% endfor %}
         </select>
 
