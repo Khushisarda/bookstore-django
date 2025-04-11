@@ -83,6 +83,11 @@ def book_list(request):
     })
 
 @login_required
+def clear_cart(request):
+    request.session['cart'] = {}
+    return redirect('cart')
+
+@login_required
 def add_to_cart(request, book_id):
     cart = request.session.get('cart')
 
@@ -98,8 +103,18 @@ def add_to_cart(request, book_id):
         cart[book_id_str] = 1
 
     request.session['cart'] = cart
+    messages.success(request, "Book added to cart!")
     return redirect('cart')
 
+
+@login_required
+def cart_view(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    total_price = sum(item.subtotal() for item in cart_items)
+    return render(request, 'store/cart.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
 
 
 @login_required
