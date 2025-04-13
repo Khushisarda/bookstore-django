@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-v3e$ca$zht-h31xor682+pw)h)p0y6)3)74h4&o$e3s22k1dr!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -79,7 +79,7 @@ DATABASES = {
         'NAME': 'bookstore_db',
         'USER': 'django_user',
         'PASSWORD': 'django123',
-        'HOST': 'localhost',
+        'HOST': 'db',
         'PORT': '3306',
     }
 }

@@ -4,34 +4,45 @@ from django.contrib.auth.decorators import login_required
 from .models import Book
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
-from .forms import RegistrationForm
-from django.contrib import messages 
+from django.contrib import messages
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
+
 
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+
 def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            return redirect('login')  # Redirect to the login page after successful registration
-    else:
-        form = RegistrationForm()
+        # Manually get the data from the POST request
+        username = request.POST['username']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        # Check if passwords match
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return render(request, 'store/register.html')
+
+        # Create the user and set the password
+        user = User.objects.create_user(username=username, email=email, password=password)
+        user.save()
+
+        # Redirect to login page after registration
+        messages.success(request, "Registration successful! Please log in.")
+        return redirect('login')
     
-    return render(request, 'store/register.html', {'form': form})
+    return render(request, 'store/register.html')
+
 
 def home(request):
     books = Book.objects.all()
     return render(request, 'store/home.html', {'books': books})
 
 
-
-
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -39,26 +50,13 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
+            messages.success(request, "You have successfully logged in!")
             return redirect('book_list')
         else:
             return render(request, 'store/login.html', {'error': 'Invalid credentials'})
     return render(request, 'store/login.html')
 
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            messages.success(request, "You have successfully logged in!")  
-            return redirect('book_list')
-        else:
-            return render(request, 'store/login.html', {'error': 'Invalid credentials'})
-    return render(request, 'store/login.html')
-
-@login_required
 @login_required
 def book_list(request):
     query = request.GET.get('q')
@@ -82,10 +80,12 @@ def book_list(request):
         'page_obj': page_obj
     })
 
+
 @login_required
 def clear_cart(request):
     request.session['cart'] = {}
     return redirect('cart')
+
 
 @login_required
 def add_to_cart(request, book_id):
@@ -147,17 +147,21 @@ def book_detail(request, pk):
     book = get_object_or_404(Book, pk=pk)
     return render(request, 'store/book_detail.html', {'book': book})
 
+
 @login_required
 def update_cart(request, book_id):
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
         cart = request.session.get('cart', {})
+
         if quantity > 0:
             cart[str(book_id)] = quantity
         else:
             cart.pop(str(book_id), None)
+
         request.session['cart'] = cart
     return redirect('cart')
+
 
 @login_required
 def remove_from_cart(request, book_id):
@@ -178,5 +182,3 @@ def home(request):
     if request.user.is_authenticated:
         return redirect('book_list')
     return redirect('login')
-
-# Create your views here.

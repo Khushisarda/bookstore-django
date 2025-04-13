@@ -4,17 +4,24 @@
 <div class="container mt-5">
     <h2 class="text-center mb-4">Available Books</h2>
 
-    <form method="get" class="mb-4 d-flex gap-2 flex-wrap justify-content-center">
-        <select name="category" class="form-select" style="max-width: 200px;">
-            <option value="all">All Categories</option>
-            {% for cat in categories %}
-                <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
-            {% endfor %}
-        </select>
+    <div class="mb-4 d-flex gap-2 flex-wrap justify-content-center">
+        <!-- Category Filter as a dropdown -->
+        <div>
+            <label for="category" class="form-label">Category</label>
+            <select name="category" class="form-select" style="max-width: 200px;" onchange="location = this.value;">
+                <option value="?category=all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+                {% for cat in categories %}
+                    <option value="?category={{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <input type="text" name="q" class="form-control" placeholder="Search books..." value="{{ request.GET.q }}" style="max-width: 300px;">
-        <button type="submit" class="btn btn-dark">Filter</button>
-    </form>
+        <!-- Search Input -->
+        <div>
+            <label for="search" class="form-label">Search</label>
+            <input type="text" name="q" class="form-control" placeholder="Search books..." value="{{ request.GET.q }}" style="max-width: 300px;" oninput="this.form.submit()">
+        </div>
+    </div>
 
     <div class="row justify-content-center">
         {% for book in books %}
@@ -91,7 +98,6 @@
         background-color: #343a40;
         border-color: #343a40;
     }
-    </style>
-    
-{% endblock %}
+</style>
 
+{% endblock %}
