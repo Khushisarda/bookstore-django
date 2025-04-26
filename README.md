@@ -63,3 +63,23 @@ These instructions assume you have Docker and Docker Compose installed and runni
 ```bash
 git clone https://github.com/Khushisarda/bookstore_project.git
 cd bookstore_project
+Step 2: Build the Docker Images
+bash
+Copy
+Edit
+docker-compose build
+Step 3: Apply Database Migrations
+bash
+Copy
+Edit
+docker-compose run --rm web python manage.py migrate
+Step 4: Create a Superuser for Admin Access
+bash
+Copy
+Edit
+docker-compose run --rm web python manage.py createsuperuser
+Step 5: Start the Application
+bash
+Copy
+Edit
+docker-compose up
